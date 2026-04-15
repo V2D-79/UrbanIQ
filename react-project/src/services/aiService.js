@@ -3,7 +3,7 @@
  * Communicates with the FastAPI backend + local AI model
  */
 
-const API_BASE = "https://urbaniq-0hse.onrender.com";
+const API_BASE = "http://localhost:8000";
 
 async function apiCall(endpoint, method = "GET", body = null) {
   const opts = {

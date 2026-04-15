@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useAuth } from "../context/AuthContext";
 import { addReport, subscribeToUserReports, updateReport, deleteReport } from "../services/firebaseService";
+import { sendReportCreatedEmail } from "../services/emailService";
 import "./GeoTag.css";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -179,8 +180,18 @@ const GeoTag = () => {
     if (!geoTagMode || !pendingReport) return;
     try {
       const report = { ...pendingReport, lat: latlng.lat, lng: latlng.lng };
-      await addReport(report);
+      const savedReport = await addReport(report);
       showToast("Report added successfully! 🎉", "success");
+
+      // Send email notification via backend
+      const userEmail = user?.email || userProfile?.email;
+      const userName = userProfile?.name || "Citizen";
+      if (userEmail) {
+        sendReportCreatedEmail(savedReport || report, userEmail, userName)
+          .then((ok) => ok && console.log("[UrbanIQ] Report email triggered"))
+          .catch(() => {});
+      }
+
       resetForm();
       setGeoTagMode(false);
       setPendingReport(null);

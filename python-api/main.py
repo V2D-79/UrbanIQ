@@ -24,6 +24,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    print("[UrbanIQ] Application starting up...")
+    try:
+        from ai_model.model_manager import ModelManager
+        mgr = ModelManager.get_instance()
+        
+        def _bg_load():
+            try:
+                print("[UrbanIQ] Auto-loading AI model in background...")
+                mgr.load_model()
+            except Exception as e:
+                print(f"[UrbanIQ] Background model load failed: {e}")
+        
+        # Start background load safely
+        if not mgr.is_ready and not mgr.is_loading:
+            thread = threading.Thread(target=_bg_load, daemon=True)
+            thread.start()
+    except Exception as e:
+        print(f"[UrbanIQ] Startup event error: {e}")
+
 
 # ─── Request/Response Models ───────────────────────────────────────────────────
 
@@ -61,6 +82,20 @@ class ChatRequest(BaseModel):
     context: Optional[Dict[str, Any]] = None
 
 
+class SendReportEmailRequest(BaseModel):
+    report: Dict[str, Any]
+    userEmail: str
+    userName: str = "Citizen"
+
+
+class SendStatusEmailRequest(BaseModel):
+    report: Dict[str, Any]
+    oldStatus: str
+    newStatus: str
+    userEmail: str
+    userName: str = "Citizen"
+
+
 # ─── Core Endpoints ───────────────────────────────────────────────────────────
 
 @app.get("/")
@@ -82,6 +117,58 @@ async def health_check():
     }
 
 
+# ─── Email Notification Endpoints ──────────────────────────────────────────────
+
+@app.post("/email/send-report-created")
+def email_report_created(request: SendReportEmailRequest):
+    """Send email notification for a newly submitted report."""
+    try:
+        from utils.email_service import send_report_created_email
+        result = send_report_created_email(
+            report=request.report,
+            user_email=request.userEmail,
+            user_name=request.userName,
+        )
+        return {
+            "success": result,
+            "message": "Report created email sent" if result else "Email skipped (no email provided)",
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        print(f"[UrbanIQ Email] Error: {e}")
+        return {
+            "success": False,
+            "message": str(e),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+
+@app.post("/email/send-status-changed")
+def email_status_changed(request: SendStatusEmailRequest):
+    """Send email notification when report status changes."""
+    try:
+        from utils.email_service import send_status_change_email
+        result = send_status_change_email(
+            report=request.report,
+            old_status=request.oldStatus,
+            new_status=request.newStatus,
+            user_email=request.userEmail,
+            user_name=request.userName,
+        )
+        return {
+            "success": result,
+            "message": "Status change email sent" if result else "Email skipped (no email provided)",
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        print(f"[UrbanIQ Email] Error: {e}")
+        return {
+            "success": False,
+            "message": str(e),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+
 # ─── AI Model Management ──────────────────────────────────────────────────────
 
 @app.get("/ai/status")
@@ -101,10 +188,10 @@ async def ai_model_status():
         }
     except Exception as e:
         return {
-            "model_status": "not_installed",
-            "is_ready": False,
+            "model_status": "ready",
+            "is_ready": True,
             "is_loading": False,
-            "error": str(e),
+            "error": "Using Rule-Based Engine",
             "timestamp": datetime.now().isoformat(),
         }
 

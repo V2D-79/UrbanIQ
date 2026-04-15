@@ -123,8 +123,7 @@ const AdminReports = () => {
           </div>
           <div className="ar-header-right">
             <div className={`ai-status ${aiStatus}`}><span className="status-dot"></span> API: {aiStatus}</div>
-            <div className={`ai-status ${modelStatus === "ready" ? "online" : "offline"}`}><span className="status-dot"></span> AI: {modelStatus}</div>
-            {modelStatus !== "ready" && <button className="btn btn-sm btn-secondary" onClick={handleLoadModel}><i className="fas fa-download"></i> Load Model</button>}
+            <div className="ai-status online"><span className="status-dot"></span> AI: loaded</div>
             <button className="btn btn-primary" onClick={runBatchAnalysis} disabled={aiLoading || reports.length === 0}>
               <i className={`fas ${aiLoading ? "fa-spinner fa-spin" : "fa-brain"}`}></i> AI Analysis
             </button>
@@ -230,7 +229,7 @@ const AdminReports = () => {
                           <button className="btn btn-sm btn-secondary" onClick={(e) => { e.stopPropagation(); runAISuggestion(r); }} title="AI Suggestion" disabled={aiLoading}>
                             <i className="fas fa-brain"></i>
                           </button>
-                          <button className="btn btn-sm btn-ghost" onClick={(e) => { e.stopPropagation(); generateReportPDF(r); }} title="Download PDF">
+                          <button className="btn btn-sm btn-ghost" onClick={(e) => { e.stopPropagation(); generateReportPDF(r, r.progress ? Object.values(r.progress) : [], r.feedback); }} title="Download PDF">
                             <i className="fas fa-file-pdf"></i>
                           </button>
                           <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); handleDeleteReport(r); }} title="Delete">

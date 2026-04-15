@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, LayersControl, useMap }
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useAuth } from "../context/AuthContext";
-import { subscribeToAllReports, addProgressUpdate, updateReport, deleteReport } from "../services/firebaseService";
+import { subscribeToAllReports, addProgressUpdate, updateReport, deleteReport, getUserProfile } from "../services/firebaseService";
+import { sendStatusChangeEmail } from "../services/emailService";
 import "./AdminGeoTag.css";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -143,6 +144,7 @@ const AdminGeoTag = () => {
     if (!progressDesc.trim()) { showToast("Description is required", "warning"); return; }
     if (!progressStatus) { showToast("Select a status", "warning"); return; }
     try {
+      const oldStatus = selectedReport.status;
       await addProgressUpdate(selectedReport.id, {
         description: progressDesc.trim(),
         status: progressStatus,
@@ -151,6 +153,22 @@ const AdminGeoTag = () => {
         authorityName: userProfile?.name || "Authority",
       });
       showToast("Progress update added!", "success");
+
+      // Send status change email
+      if (progressStatus !== oldStatus && selectedReport.userId) {
+        getUserProfile(selectedReport.userId).then((citizenProfile) => {
+          if (citizenProfile?.email) {
+            sendStatusChangeEmail(
+              selectedReport,
+              oldStatus,
+              progressStatus,
+              citizenProfile.email,
+              citizenProfile.name || "Citizen"
+            ).then((ok) => ok && console.log("[UrbanIQ] Status email triggered"));
+          }
+        }).catch(err => console.warn("Failed to fetch citizen profile for email", err));
+      }
+
       setShowProgressForm(false);
       setProgressDesc("");
       setProgressStatus("");
