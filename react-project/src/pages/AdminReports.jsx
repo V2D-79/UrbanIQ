@@ -43,9 +43,17 @@ const AdminReports = () => {
   }, []);
 
   useEffect(() => {
-    checkAIHealth().then((r) => setAiStatus(r.status === "healthy" ? "online" : "offline"));
-    getAIModelStatus().then((r) => setModelStatus(r.model_status || "unknown"));
-  }, []);
+    const checkStatus = () => {
+      checkAIHealth().then((r) => setAiStatus(r.status === "healthy" ? "online" : "offline"));
+      getAIModelStatus().then((r) => setModelStatus(r.model_status || "unknown"));
+    };
+    checkStatus();
+    // Poll every 5 seconds until model is ready
+    const interval = setInterval(() => {
+      if (modelStatus !== "ready") checkStatus();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [modelStatus]);
 
   const showToast = (msg, type = "info") => { setToast({ message: msg, type }); setTimeout(() => setToast(null), 3000); };
 

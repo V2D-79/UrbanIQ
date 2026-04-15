@@ -7,6 +7,7 @@ This is the smallest capable instruction-following model (~1GB).
 import os
 import sys
 import time
+import traceback
 from pathlib import Path
 
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
@@ -30,6 +31,7 @@ class ModelManager:
         self._ready = False
         self._loading = False
         self._error = None
+        self._load_progress = ""
 
     @property
     def is_ready(self):
@@ -78,45 +80,69 @@ class ModelManager:
 
         self._loading = True
         self._error = None
+        self._load_progress = "starting"
 
         try:
             # Auto-detect device
             if torch.cuda.is_available():
                 self._device = "cuda"
-                dtype = torch.float16
+                model_dtype = torch.float16
                 print(f"[UrbanIQ AI] Using GPU: {torch.cuda.get_device_name(0)}")
             else:
                 self._device = "cpu"
-                dtype = torch.float32
+                model_dtype = torch.float32
                 print("[UrbanIQ AI] Using CPU (no GPU detected)")
 
             # Download if needed
             if not self.is_downloaded():
+                self._load_progress = "downloading"
                 self.download_model()
 
             source = str(MODEL_DIR)
             print(f"[UrbanIQ AI] Loading model from {source} ...")
 
+            self._load_progress = "loading_tokenizer"
             self._tokenizer = AutoTokenizer.from_pretrained(
                 source, trust_remote_code=True
             )
-            self._model = AutoModelForCausalLM.from_pretrained(
-                source,
-                torch_dtype=dtype,
-                trust_remote_code=True,
-            ).to(self._device)
+            print("[UrbanIQ AI] Tokenizer loaded.")
 
+            self._load_progress = "loading_model"
+            # Load model — try 'dtype' first (new API), fall back to 'torch_dtype'
+            try:
+                self._model = AutoModelForCausalLM.from_pretrained(
+                    source,
+                    dtype=model_dtype,
+                    trust_remote_code=True,
+                )
+            except TypeError:
+                self._model = AutoModelForCausalLM.from_pretrained(
+                    source,
+                    torch_dtype=model_dtype,
+                    trust_remote_code=True,
+                )
+            print("[UrbanIQ AI] Model weights loaded.")
+
+            self._load_progress = "moving_to_device"
+            print(f"[UrbanIQ AI] Moving model to {self._device}...")
+            self._model = self._model.to(self._device)
+            print("[UrbanIQ AI] Model moved to device.")
+
+            self._load_progress = "finalizing"
             self._model.eval()
             self._ready = True
             self._loading = False
+            self._load_progress = "ready"
             print("[UrbanIQ AI] Model loaded and ready!")
 
         except Exception as e:
             self._error = str(e)
             self._loading = False
             self._ready = False
+            self._load_progress = "error"
             print(f"[UrbanIQ AI] ERROR loading model: {e}")
-            raise
+            traceback.print_exc()
+            # Don't re-raise — let the fallback system handle it
 
     def ensure_ready(self):
         """Ensure model is loaded before use."""

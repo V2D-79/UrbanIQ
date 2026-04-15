@@ -94,11 +94,16 @@ async def ai_model_status():
             "model_status": mgr.status,
             "model_name": "Qwen2.5-0.5B-Instruct",
             "is_downloaded": mgr.is_downloaded(),
+            "is_ready": mgr.is_ready,
+            "is_loading": mgr.is_loading,
+            "load_progress": getattr(mgr, '_load_progress', ''),
             "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         return {
             "model_status": "not_installed",
+            "is_ready": False,
+            "is_loading": False,
             "error": str(e),
             "timestamp": datetime.now().isoformat(),
         }
@@ -112,7 +117,10 @@ def ai_load_model():
         mgr = ModelManager.get_instance()
 
         def _load():
-            mgr.load_model()
+            try:
+                mgr.load_model()
+            except Exception as e:
+                print(f"[UrbanIQ AI] Background load failed: {e}")
 
         if not mgr.is_ready and not mgr.is_loading:
             thread = threading.Thread(target=_load, daemon=True)

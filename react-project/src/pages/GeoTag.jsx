@@ -221,7 +221,7 @@ const GeoTag = () => {
           <h2><i className="fas fa-map-marker-alt"></i> My Reports</h2>
           <div className="sidebar-header-actions">
             <span className="report-count">{reports.length}</span>
-            <button className="btn btn-sm btn-primary" onClick={() => { setShowReportForm(true); setEditingReport(null); resetForm(); }}>
+            <button className="btn btn-sm btn-primary" onClick={() => { resetForm(); setShowReportForm(true); }}>
               <i className="fas fa-plus"></i> Report
             </button>
           </div>
@@ -252,7 +252,7 @@ const GeoTag = () => {
             <div className="empty-state">
               <i className="fas fa-clipboard-list"></i>
               <p>No reports yet</p>
-              <button className="btn btn-primary btn-sm" onClick={() => setShowReportForm(true)}>
+              <button className="btn btn-primary btn-sm" onClick={() => { resetForm(); setShowReportForm(true); }}>
                 <i className="fas fa-plus"></i> Create First Report
               </button>
             </div>
