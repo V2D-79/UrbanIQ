@@ -1,0 +1,8 @@
+id,name,type,lat,lng,status,created_at,updated_at,input_voltage,output_voltage,capacity_kva,cooling_type,oil_level,peak_power,panel_type,efficiency,tracking_system
+1,v,transformer,16.695203882934084,74.21170234680177,active,2026-01-27 22:13:23,2026-01-27 22:13:23,33,11,500,ONAN,100,,,,
+2,o,transformer,16.68253492287088,74.21376228332521,active,2026-01-27 22:13:39,2026-01-27 22:13:39,33,11,500,ONAN,100,,,,
+3,Kolhapur Main Substation,substation,16.6905,74.215,active,2026-04-07 18:33:38,2026-04-07 18:33:38,,,,,,,,,
+4,Kagal Solar Park,solar_plant,16.67,74.2005,active,2026-04-07 18:33:40,2026-04-07 18:33:40,,,,,,50000,Monocrystalline,22,Single-axis
+5,Panhala Hills Wind Farm,wind_plant,16.715,74.19,active,2026-04-07 18:33:42,2026-04-07 18:33:42,,,,,,,,,
+6,Residential Transformer Section A,transformer,16.698,74.225,active,2026-04-07 18:33:44,2026-04-07 18:33:44,33,11,1000,ONAN,100,,,,
+7,Industrial Transformer Zone B,transformer,16.685,74.235,active,2026-04-07 18:33:46,2026-04-07 18:33:46,33,11,2500,ONAN,100,,,,

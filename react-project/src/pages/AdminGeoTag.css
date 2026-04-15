@@ -1,0 +1,43 @@
+/* ═══════════ ADMIN GEOTAG ═══════════ */
+.admin-geotag-page { display: flex; height: calc(100vh - 68px); overflow: hidden; position: relative; }
+
+.admin-sidebar {
+  width: 360px; background: var(--bg-secondary); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; transition: width 0.3s; position: relative; z-index: 500;
+}
+.admin-sidebar.collapsed { width: 0; overflow: hidden; }
+
+.admin-filters { padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid var(--border); }
+.admin-filters .form-control { padding: 8px 10px; font-size: 0.85rem; }
+
+.hotspot-btn-area { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+
+.admin-reports-list { flex: 1; overflow-y: auto; padding: 8px; }
+
+.admin-map-area { flex: 1; position: relative; }
+
+/* Floating detail panel */
+.admin-report-detail {
+  position: absolute; top: 12px; right: 12px;
+  width: 360px; max-height: calc(100vh - 120px);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+  box-shadow: var(--shadow-lg); overflow-y: auto; z-index: 800;
+  animation: modalIn 0.3s ease;
+}
+.detail-fields-compact { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+.detail-fields-compact > div { display: flex; justify-content: space-between; align-items: flex-start; }
+.detail-fields-compact label { color: var(--text-muted); font-size: 0.82rem; min-width: 80px; }
+.detail-fields-compact span, .detail-fields-compact p { color: var(--text-primary); font-size: 0.88rem; text-align: right; flex: 1; margin: 0; }
+.detail-images-compact { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.detail-images-compact img { width: 70px; height: 55px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+.detail-actions-compact { display: flex; gap: 8px; }
+.modal-subtitle { color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; }
+
+@media (max-width: 768px) {
+  .admin-geotag-page { flex-direction: column; }
+  .admin-sidebar { width: 100%; height: 35vh; }
+  .admin-sidebar.collapsed { height: 0; }
+  .admin-map-area { height: 65vh; }
+  .admin-report-detail { width: calc(100% - 24px); top: auto; bottom: 12px; max-height: 50vh; }
+}

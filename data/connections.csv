@@ -1,0 +1,7 @@
+id,from_id,to_id,line_type,capacity_kw,length_km,voltage_kv,status,color,created_at
+1,2,1,transmission,1000,0.3,11,active,#ff0000,2026-01-27 21:18:14
+2,1,2,transmission,1000,1.42,11,active,#ff0000,2026-01-27 22:13:54
+3,3,6,distribution,2000,1.35,33,active,#00CED1,2026-04-07 18:33:48
+4,3,7,distribution,4000,2.22,33,active,#10b981,2026-04-07 18:33:50
+5,4,3,transmission,50000,2.75,110,active,#f59e0b,2026-04-07 18:33:52
+6,5,3,transmission,20000,3.8,110,active,#3d7eff,2026-04-07 18:33:54
